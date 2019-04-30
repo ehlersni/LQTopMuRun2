@@ -1,0 +1,12 @@
+*~
+*#
+.*
+obj/*
+config/workdir_*
+config/jobTempOutput_*
+*.png
+*.gif
+*.jpg
+*.eps
+*.ps
+*.pdf
