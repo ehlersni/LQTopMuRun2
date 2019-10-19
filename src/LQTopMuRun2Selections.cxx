@@ -151,7 +151,7 @@ bool ElectronJetOverlapCleaner::process(Event & event, int idx1, int idx2){
       return false;
     }
   }
-  if (idx1 < 0 || idx2 < 2){
+  if (idx1 < 0 || idx2 < 0){
     throw runtime_error("ElectronJetOverlapCleaner was not given valid electron indices");
     return false;
   }
@@ -173,8 +173,8 @@ ZEEFinder::ZEEFinder(){}
 pair<int,int> ZEEFinder::search(Event & event){
   if(event.electrons){
     if(event.electrons->size() < 2){
-      cout << "This event does not contain >= 2 electrons,  no pair can be found. Going to return (-1, -1)." << endl;
-      pair<int, int> dummy(-1, -1);
+      cout << "This event does not contain >= 2 electrons, no pair can be found. Going to return (-1,-1)." << endl;
+      pair<int,int> dummy(-1,-1);
       return dummy;
     }
   }
@@ -197,7 +197,6 @@ pair<int,int> ZEEFinder::search(Event & event){
   }
   pair<int,int> dummy(idx_best_ele1,idx_best_ele2);
   return dummy;
-
 }
 
 pair<int,int> ZEEFinder::search(const Event & event){
@@ -216,12 +215,12 @@ pair<int,int> ZEEFinder::search(const Event & event){
   for(int i=0; i<Nele; i++){
     for(int j=0; j<Nele; j++){
       if(j>i){
-	double Mee = (event.electrons->at(i).v4()+event.electrons->at(j).v4()).M();
-	if(fabs(Mee - 91.2) < fabs(Mee_best - 91.2)){
-	  Mee_best = Mee;
-	  idx_best_ele1 = i;
-	  idx_best_ele2 = j;
-	}
+        double Mee = (event.electrons->at(i).v4()+event.electrons->at(j).v4()).M();
+        if(fabs(Mee - 91.2) < fabs(Mee_best - 91.2)){
+          Mee_best = Mee;
+          idx_best_ele1 = i;
+          idx_best_ele2 = j;
+        }
       }
     }
   }
@@ -229,17 +228,19 @@ pair<int,int> ZEEFinder::search(const Event & event){
   return dummy;
 }
 
-DibosonScaleFactors::DibosonScaleFactors(Context & ctx, TString path_, TString SysDirectionXSec_, TString SysDirectionBTag_) : path(path_), SysDirectionXSec(SysDirectionXSec_), SysDirectionBTag(SysDirectionBTag_){
+DibosonScaleFactors::DibosonScaleFactors(Context & ctx, TString path_, TString SysDirectionXSec_) : path(path_), SysDirectionXSec(SysDirectionXSec_){ //, TString SysDirectionBTag_ , SysDirectionBTag(SysDirectionBTag_){
 
   auto dataset_type = ctx.get("dataset_type");
   bool is_mc = dataset_type == "MC";
   if(!is_mc){
+    cout << 1 << endl;
     cout << "Warning: ElectronTriggerWeights will not have an effect on this non-MC sample (dataset_type = '" + dataset_type + "')" << endl;
     return;
   }
   TString dataset_version = ctx.get("dataset_version");
   if(!dataset_version.Contains("Diboson")){
     is_diboson = false;
+    cout << 2 << endl;
     cout << "DibosonScaleFactors will not have an effect on this non-Diboson sample (dataset_version = '" + dataset_version + "')" << endl;
     return;
   }
@@ -253,51 +254,57 @@ bool DibosonScaleFactors::process(Event & event){
   unique_ptr<TFile> file;
   file.reset(new TFile(path,"READ"));
 
-  unique_ptr<TH1D> XSecSF, BTagSF;
+  unique_ptr<TH1D> XSecSF;//, BTagSF;
   XSecSF.reset((TH1D*)file->Get("Diboson_XSec_SF"));
-  BTagSF.reset((TH1D*)file->Get("Diboson_BTag_SF"));
+  // BTagSF.reset((TH1D*)file->Get("Diboson_BTag_SF"));
 
-  double xsec_SF, btag1_SF, btag2_SF;
-  if(SysDirectionXSec == "nominal")   xsec_SF = XSecSF->GetBinContent(1);
-  else if(SysDirectionXSec == "up")   xsec_SF = XSecSF->GetBinContent(1) + XSecSF->GetBinError(1);
-  else if(SysDirectionXSec == "down") xsec_SF = XSecSF->GetBinContent(1) - XSecSF->GetBinError(1);
+  double xsec_SF; //, btag1_SF, btag2_SF;
+  if(SysDirectionXSec == "nominal"){
+    xsec_SF = XSecSF->GetBinContent(1);
+  }
+  else if(SysDirectionXSec == "up"){
+    xsec_SF = XSecSF->GetBinContent(1) + XSecSF->GetBinError(1);
+  }
+  else if(SysDirectionXSec == "down"){
+    xsec_SF = XSecSF->GetBinContent(1) - XSecSF->GetBinError(1);
+  }
   else throw runtime_error("In DibosonScaleFactors::process(): Invalid SysDirectionXSec specified.");
 
-  if(SysDirectionBTag == "nominal"){
-    btag1_SF = BTagSF->GetBinContent(1);
-    btag2_SF = BTagSF->GetBinContent(2);
-  }
-  else if(SysDirectionBTag == "up"){
-    btag1_SF = BTagSF->GetBinContent(1) + BTagSF->GetBinError(1);
-    btag2_SF = BTagSF->GetBinContent(2) + BTagSF->GetBinError(2);
-  }
-  else if(SysDirectionBTag == "down"){
-    btag1_SF = BTagSF->GetBinContent(1) - BTagSF->GetBinError(1);
-    btag2_SF = BTagSF->GetBinContent(2) - BTagSF->GetBinError(2);
-  }
-  else throw runtime_error("In DibosonScaleFactors::process(): Invalid SysDirectionBTag specified.");
-
+  // if(SysDirectionBTag == "nominal"){
+  //   btag1_SF = BTagSF->GetBinContent(1);
+  //   btag2_SF = BTagSF->GetBinContent(2);
+  // }
+  // else if(SysDirectionBTag == "up"){
+  //   btag1_SF = BTagSF->GetBinContent(1) + BTagSF->GetBinError(1);
+  //   btag2_SF = BTagSF->GetBinContent(2) + BTagSF->GetBinError(2);
+  // }
+  // else if(SysDirectionBTag == "down"){
+  //   btag1_SF = BTagSF->GetBinContent(1) - BTagSF->GetBinError(1);
+  //   btag2_SF = BTagSF->GetBinContent(2) - BTagSF->GetBinError(2);
+  // }
+  // else throw runtime_error("In DibosonScaleFactors::process(): Invalid SysDirectionBTag specified.");
+  //
   //First apply XSec SF to all Diboson events before applying 1&2-btag SF
   //cout << "Weight before xsec SF: " << event.weight << ", SF: " << xsec_SF << endl;
   event.weight *= xsec_SF;
   //cout << "Weight after xsec SF: " << event.weight << endl;
 
   //Count number of loose b-jets in the event
-  int n_bjets = 0;
-  CSVBTag Btag_loose = CSVBTag(CSVBTag::WP_LOOSE);
-  for (unsigned int i =0; i<event.jets->size(); ++i) {
-    if(Btag_loose(event.jets->at(i),event)){
-      n_bjets++;
-    }
-  }
-
-  //cout << "Number of btags in the event: " << n_bjets << endl;
-  //cout << "SF1: " << btag1_SF << ", SF2: " << btag2_SF << endl;
-  //cout << "Weight before applying BTag SF: " << event.weight << endl;
-  //apply 1&2-btag SF
-  if(n_bjets > 2) throw runtime_error("In DibosonScaleFactors::process(): More than 2 b-jets present in the event. Scale factors have only been derived for Nbjets <= 2.");
-  else if(n_bjets == 1) event.weight *= btag1_SF;
-  else if(n_bjets == 2) event.weight *= btag2_SF;
+  // int n_bjets = 0;
+  // CSVBTag Btag_loose = CSVBTag(CSVBTag::WP_LOOSE);
+  // for (unsigned int i =0; i<event.jets->size(); ++i) {
+  //   if(Btag_loose(event.jets->at(i),event)){
+  //     n_bjets++;
+  //   }
+  // }
+  //
+  // //cout << "Number of btags in the event: " << n_bjets << endl;
+  // //cout << "SF1: " << btag1_SF << ", SF2: " << btag2_SF << endl;
+  // //cout << "Weight before applying BTag SF: " << event.weight << endl;
+  // //apply 1&2-btag SF
+  // if(n_bjets > 2) throw runtime_error("In DibosonScaleFactors::process(): More than 2 b-jets present in the event. Scale factors have only been derived for Nbjets <= 2.");
+  // else if(n_bjets == 1) event.weight *= btag1_SF;
+  // else if(n_bjets == 2) event.weight *= btag2_SF;
   //cout << "Weight after applying BTag SF: " << event.weight << endl;
 
   return true;

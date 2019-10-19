@@ -20,6 +20,7 @@
 #include "UHH2/LQTopMuRun2/include/LQTopMuRun2EleTriggerEffHists.h"
 #include "UHH2/common/include/MCWeight.h"
 #include "UHH2/LQTopMuRun2/include/LQTopMuRun2EleTriggerWeights.h"
+#include "UHH2/common/include/Utils.h"
 
 using namespace std;
 using namespace uhh2;
@@ -70,7 +71,11 @@ namespace uhh2examples {
 
     JetId BTagID;
     CSVBTag::wp wp_btag_loose;
-    MuonId MuonID;
+    BTag::algo btag_algo;
+
+
+
+    MuonId MuID;
     ElectronId ElectronID;
     ElectronId ElectronID_trigger30;
     ElectronId ElectronID_trigger120;
@@ -92,11 +97,34 @@ namespace uhh2examples {
     cout << "Hello World from LQTopMuRun2FullSelectionEleTriggerEff!" << endl;
     for(auto & kv : ctx.get_all()) cout << " " << kv.first << " = " << kv.second << endl;
 
-    ElectronID = AndId<Electron>(ElectronID_Spring16_tight, PtEtaCut(10., 2.4));
-    ElectronID_trigger30 = AndId<Electron>(ElectronID_Spring16_tight,PtEtaCut(30.0, 2.4)); //30
+
+
+    Year year = extract_year(ctx);
+    if (year == Year::is2016v3) {
+      ElectronID = AndId<Electron>(ElectronID_Summer16_tight, PtEtaCut(10.0, 2.4));
+      ElectronID_trigger30 = AndId<Electron>(ElectronID_Summer16_tight, PtEtaCut(30.0, 2.4));
+      ElectronID_trigger120 = AndId<Electron>(ElectronID_Summer16_tight, PtEtaCut(120.0, 2.4));
+    }
+    else if (year == Year::is2017v1) {
+      ElectronID = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(10.0, 2.4));
+      ElectronID_trigger30 = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(30.0, 2.4));
+      ElectronID_trigger120 = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(120.0, 2.4));
+    }
+    else if (year == Year::is2018) {
+      ElectronID = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(10.0, 2.4));
+      ElectronID_trigger30 = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(30.0, 2.4));
+      ElectronID_trigger120 = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(120.0, 2.4));
+    }
+
+    MuID = AndId<Muon>(MuonID(Muon::CutBasedIdTight), MuonIso(0.15));
+
+
+    // ElectronID = AndId<Electron>(ElectronID_Spring16_tight, PtEtaCut(10., 2.4));
+    // ElectronID_trigger30 = AndId<Electron>(ElectronID_Spring16_tight,PtEtaCut(30.0, 2.4)); //30
     //ElectronID_trigger50 = AndId<Electron>(ElectronID_Spring16_tight,PtEtaCut(50.0, 2.4));
-    ElectronID_trigger120 = AndId<Electron>(ElectronID_Spring16_tight,PtEtaCut(120.0, 2.4));
-    MuonID = AndId<Muon>(MuonIDTight(), PtEtaCut(30., 2.4), MuonIso(0.15));
+    // ElectronID_trigger120 = AndId<Electron>(ElectronID_Spring16_tight,PtEtaCut(120.0, 2.4));
+    // MuonID = AndId<Muon>(MuonIDTight(), PtEtaCut(30., 2.4), MuonIso(0.15));
+
     JetID = PtEtaCut(30., 2.4);
 
 
@@ -111,7 +139,7 @@ namespace uhh2examples {
     common->disable_jersmear();
     common->disable_jec();
     common->set_electron_id(ElectronID);
-    common->set_muon_id(MuonID);
+    common->set_muon_id(MuID);
     common->init(ctx);
 
 
@@ -125,12 +153,12 @@ namespace uhh2examples {
     if((!is_mu_e && !is_e_e)) throw runtime_error("In SidebandPreselectionModule: Invalid definition of 'channel' in config file, must be 'mu_e', 'e_mu', or 'e_e'.");
     apply_EleTriggerSF = (is_mc && is_e_e);
 
-    SF_muonID.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonID_EfficienciesAndSF_average_RunBtoH.root", "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta", 1., "tightID", true, "nominal"));
-    SF_muonTrigger.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonTrigger_EfficienciesAndSF_average_RunBtoH.root", "IsoMu24_OR_IsoTkMu24_PtEtaBins", 0.5, "trigger", true, "nominal"));
-    SF_muonIso.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonIso_EfficienciesAndSF_average_RunBtoH.root", "TightISO_TightID_pt_eta", 1., "iso", true, "nominal"));
+    SF_muonID.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonID_EfficienciesAndSF_average_RunBtoH.root", "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta", 1., "tightID", true, "nominal"));
+    SF_muonTrigger.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonTrigger_EfficienciesAndSF_average_RunBtoH.root", "IsoMu24_OR_IsoTkMu24_PtEtaBins", 0.5, "trigger", true, "nominal"));
+    SF_muonIso.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonIso_EfficienciesAndSF_average_RunBtoH.root", "TightISO_TightID_pt_eta", 1., "iso", true, "nominal"));
 
-    SF_eleReco.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/egammaEffi.txt_EGM2D_RecEff_Moriond17.root", 1, "", "nominal"));
-    SF_eleID.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/egammaEffi.txt_EGM2D_CutBased_Loose_ID.root", 1, "", "nominal"));
+    SF_eleReco.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/egammaEffi.txt_EGM2D_RecEff_Moriond17.root", 1, "", "nominal"));
+    SF_eleID.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/egammaEffi.txt_EGM2D_CutBased_Loose_ID.root", 1, "", "nominal"));
 
 
 

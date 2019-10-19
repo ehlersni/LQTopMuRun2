@@ -8,8 +8,8 @@ if __name__=="__main__":
     # parse input
     parser = argparse.ArgumentParser(description='Run jobs created with sframe_batch.py using sframe_main in parallel.')
     parser.add_argument('workdir', help='sframe_batch.py work directory')
-    parser.add_argument('--nice', '-n', default=10, type=int)
-    parser.add_argument('--max_jobs', '-m', default=10, type=int)
+    parser.add_argument('--nice', '-n', default=0, type=int)
+    parser.add_argument('--max_jobs', '-m', default=20, type=int)
     args = parser.parse_args()
 
     if args.nice < -20 or args.nice > 19:

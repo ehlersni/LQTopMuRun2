@@ -85,6 +85,8 @@ void do_stuff(TString inpath, TString outpath, TString histname){
     TCanvas* c1 = new TCanvas("c1", "Nice histogram", 600, 600);
     TPad* pad_top = SetupRatioPadTop();
     TPad* pad_bot = SetupRatioPad();
+
+
     pad_top->Draw();
     pad_bot->Draw();
     pad_top->cd();
@@ -186,6 +188,7 @@ void do_stuff(TString inpath, TString outpath, TString histname){
     TGraphAsymmErrors* scale_factor = new TGraphAsymmErrors(n_bins, &SF_x[0], &SF_y[0], &SF_x_low[0], &SF_x_high[0], &SF_y_low[0], &SF_y_high[0]);
     HistCosmetics(scale_factor, true);
     scale_factor->GetXaxis()->SetTitle(xaxistitle);
+    scale_factor->GetXaxis()->SetTitleSize(30);
 
     // if condition
 
@@ -210,6 +213,7 @@ void do_stuff(TString inpath, TString outpath, TString histname){
     float xmax = scale_factor->GetHistogram()->GetXaxis()->GetXmax();
     // float xmin = scale_factor->GetHistogram()->GetXaxis()->GetBinLowEdge(scale_factor->GetHistogram()->GetNbinsX()+1);
     scale_factor->GetYaxis()->SetTitle("Data / MC");
+    // scale_factor->GetXaxis()->SetLabelSize(0.06);
     TLine *l=new TLine(xmin,1.0,xmax,1.0);
 
     //TLine *l=new TLine(-1,1.0,6,1.0);

@@ -41,7 +41,7 @@ namespace {
 
 LQTopMuRun2Hists::LQTopMuRun2Hists(Context & ctx, const string & dirname): Hists(ctx, dirname){
 
-cout <<"Hello from LQTopMuRun2Hists"<< endl;
+
 
 
 
@@ -153,9 +153,9 @@ cout <<"Hello from LQTopMuRun2Hists"<< endl;
 
 
   h_is_mlq_reconstructed = ctx.get_handle<bool>("is_mlq_reconstructed");
-  cout <<"hists1"<< endl;
+
   h_mlq_reco_mode = ctx.get_handle<TString>("mlq_reco_mode");
-  cout <<"hists2"<< endl;
+
   h_recohyps = ctx.get_handle<vector<LQReconstructionHypothesis>>("LQHypotheses");
 
 

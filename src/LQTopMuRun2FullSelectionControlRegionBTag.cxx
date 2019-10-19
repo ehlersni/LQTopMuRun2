@@ -79,9 +79,12 @@ namespace uhh2examples {
     // now set the unique pointer for the ReconstructionHypothesis !!!
     //unique_ptr<xx> xx;
 
+    string Sys_EleTrigger;
+
 
     JetId BTagID;
-    CSVBTag::wp wp_btag_loose;
+    BTag::wp wp_btag_loose;
+    BTag::algo btag_algo;
 
     uhh2::Event::Handle<float> h_ST;
     uhh2::Event::Handle<float> h_STlep;
@@ -103,11 +106,17 @@ namespace uhh2examples {
     h_mlq_reco_mode = ctx.get_handle<TString>("mlq_reco_mode");
 
 
+
+
+
     is_mc = ctx.get("dataset_type") == "MC";
 
+    Sys_EleTrigger = ctx.get("Systematic_EleTrigger");
 
-    wp_btag_loose = CSVBTag::WP_LOOSE;
+
+    wp_btag_loose = BTag::WP_LOOSE;
     BTagID = CSVBTag(wp_btag_loose);
+    btag_algo = BTag::CSVV2;
 
     // this is how to set unique pointer --> instanz.reset()
     common.reset(new CommonModules());
@@ -125,16 +134,16 @@ namespace uhh2examples {
     // mlq_reco.reset(new HighMassInclusiveLQReconstruction(ctx, LQNeutrinoReconstruction));
     // chi2_module.reset(new LQChi2Discriminator(ctx, "LQHypotheses"));
 
-  //  SF_muonID.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonID_EfficienciesAndSF_average_RunBtoH.root", "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta", 1., "tightID", true, "nominal"));
-    ///SF_muonTrigger.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonTrigger_EfficienciesAndSF_average_RunBtoH.root", "IsoMu24_OR_IsoTkMu24_PtEtaBins", 0.5, "trigger", true, "nominal"));
-    //SF_muonIso.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/MuonIso_EfficienciesAndSF_average_RunBtoH.root", "TightISO_TightID_pt_eta", 1., "iso", true, "nominal"));
-    SF_eleTrigger.reset(new ElectronTriggerWeights(ctx));
+    //  SF_muonID.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonID_EfficienciesAndSF_average_RunBtoH.root", "MC_NUM_TightID_DEN_genTracks_PAR_pt_eta", 1., "tightID", true, "nominal"));
+    ///SF_muonTrigger.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonTrigger_EfficienciesAndSF_average_RunBtoH.root", "IsoMu24_OR_IsoTkMu24_PtEtaBins", 0.5, "trigger", true, "nominal"));
+    //SF_muonIso.reset(new MCMuonScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/MuonIso_EfficienciesAndSF_average_RunBtoH.root", "TightISO_TightID_pt_eta", 1., "iso", true, "nominal"));
+    SF_eleTrigger.reset(new ElectronTriggerWeights(ctx, Sys_EleTrigger));
 
 
-    SF_eleReco.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/egammaEffi.txt_EGM2D_RecEff_Moriond17.root", 1, "", "nominal"));
-    SF_eleID.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/common/data/egammaEffi.txt_EGM2D_CutBased_Loose_ID.root", 1, "", "nominal"));
+    SF_eleReco.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/egammaEffi.txt_EGM2D_RecEff_Moriond17.root", 1, "", "nominal"));
+    SF_eleID.reset(new MCElecScaleFactor(ctx, "/nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/common/data/egammaEffi.txt_EGM2D_CutBased_Loose_ID.root", 1, "", "nominal"));
 
-    SF_btag.reset(new MCBTagScaleFactor(ctx, wp_btag_loose, "jets", "nominal"));
+    SF_btag.reset(new MCBTagScaleFactor(ctx, btag_algo, wp_btag_loose, "jets", "nominal"));
 
     // trigger1_mu_selection.reset(new TriggerSelection("HLT_IsoMu24_v*"));
     // trigger2_mu_selection.reset(new TriggerSelection("HLT_IsoTkMu24_v*"));
@@ -217,7 +226,7 @@ namespace uhh2examples {
     h_lumi_stselec.reset(new LuminosityHists(ctx, "Lumi_stselec"));
 
     // b-tag scale factors
-    h_btageff.reset(new BTagMCEfficiencyHists(ctx, "BTagEff", wp_btag_loose));
+    h_btageff.reset(new BTagMCEfficiencyHists(ctx, "BTagEff", BTagID));
 
 
     h_eleinvariantmass.reset(new LQTopMuRun2Hists(ctx, "eleinvariantmass"));

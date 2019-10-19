@@ -90,11 +90,11 @@ namespace uhh2examples {
   class DibosonScaleFactors: public uhh2::AnalysisModule{
 
  public:
-  explicit DibosonScaleFactors(uhh2::Context & ctx, TString path_, TString SysDirectionXSec_, TString SysDirectionBTag_);
+  explicit DibosonScaleFactors(uhh2::Context & ctx, TString path_, TString SysDirectionXSec_);//, TString SysDirectionBTag_);
   virtual bool process(uhh2::Event & event) override;
 
  private:
-  TString path, SysDirectionXSec, SysDirectionBTag;
+  TString path, SysDirectionXSec;//, SysDirectionBTag;
   bool is_diboson;
 
 };

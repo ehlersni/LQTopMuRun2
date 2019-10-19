@@ -1,0 +1,16 @@
+HTCondor Job Durations report running at Thu May  2 16:17:18 CEST 2019
+Got data from 449 hosts
+
+
+User                                 Schedd   Starts Restarted    Total  Short OSGable  Removed       1st    Median      3rd      Max     Mean       SD
+                                                         Jobs    Hours   Jobs  Hours    Hours  Quartile   Runtime Quartile  Runtime  Runtime         
+
+
+Total completed jobs yesterday: 0
+Using a total of 0 hours
+
+The following users have run vanilla jobs that have hit the MaxJobRetirementTime limit yesterday.
+
+# of	User
+Jobs
+----	----

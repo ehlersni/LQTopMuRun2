@@ -1,3 +1,3 @@
-cd /nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/LQTopMuRun2;
+cd /nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/LQTopMuRun2/;
 make -j 20;
-cd /nfs/dust/cms/user/ehlersni/CMSSW_8_0_24_patch1/src/UHH2/LQTopMuRun2/config/;
+cd /nfs/dust/cms/user/ehlersni/RUN2018/CMSSW_10_2_10/src/UHH2/LQTopMuRun2/config/;

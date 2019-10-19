@@ -17,6 +17,7 @@
 #include "UHH2/common/include/EventHists.h"
 #include "UHH2/common/include/LuminosityHists.h"
 #include "UHH2/LQTopMuRun2/include/LQTopMuRun2Hists.h"
+#include "UHH2/common/include/Utils.h"
 
 using namespace std;
 using namespace uhh2;
@@ -43,7 +44,7 @@ namespace uhh2examples {
 
     unique_ptr<Selection> muon_selection, jet_selection, st_selection, electron_selection;
 
-    MuonId MuonID;
+    MuonId MuId;
     ElectronId ElectronID;
     JetId JetID;
 
@@ -57,9 +58,24 @@ namespace uhh2examples {
     cout << "Hello World from LQTopMuRun2PreselectionControlRegion!" << endl;
     for(auto & kv : ctx.get_all()) cout << " " << kv.first << " = " << kv.second << endl;
 
-    MuonID = AndId<Muon>(MuonIDLoose(), PtEtaCut(30., 2.4), MuonIso(0.15));
+    MuId = AndId<Muon>(MuonID(Muon::CutBasedIdTight), PtEtaCut(30., 2.4), MuonIso(0.15));
+
+
     // PtEtaCut(float min_pt_, float max_eta_, float max_pt_ =-1, float min_eta_=-1)
-    ElectronID = AndId<Electron>(ElectronID_Spring16_tight, PtEtaCut(30., 2.4));
+    // ElectronID = AndId<Electron>(ElectronID_Spring16_tight, PtEtaCut(30., 2.4));
+
+    Year year = extract_year(ctx);
+    if (year == Year::is2016v3) {
+      ElectronID = AndId<Electron>(ElectronID_Summer16_tight, PtEtaCut(30.0, 2.4));
+    }
+    else if (year == Year::is2017v1) {
+      ElectronID = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(30.0, 2.4));
+    }
+    else if (year == Year::is2018) {
+      ElectronID = AndId<Electron>(ElectronID_Fall17_tight, PtEtaCut(30.0, 2.4));
+    }
+
+
     JetID = PtEtaCut(30., 2.4);
     h_ST = ctx.get_handle<float>("ST");
     h_is_mlq_reconstructed = ctx.get_handle<bool>("is_mlq_reconstructed");
@@ -70,7 +86,7 @@ namespace uhh2examples {
     common.reset(new CommonModules());
     common->switch_jetlepcleaner();
     common->switch_jetPtSorter();
-    common->set_muon_id(MuonID);
+    common->set_muon_id(MuId);
     common->set_electron_id(ElectronID);
     common->set_jet_id(JetID);
     common->init(ctx);
